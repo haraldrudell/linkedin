@@ -11,7 +11,7 @@
 	],
 	"repository": {
 		"type" : "git",
-		"url" : "https://haraldrudell@github.com/haraldrudell/linkedin.git"
+		"url" : "git://github.com/haraldrudell/linkedin.git"
 	},
 	"dependencies": {
 		"oauth": ">= 0.7.0"
