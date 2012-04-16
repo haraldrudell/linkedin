@@ -1,0 +1,20 @@
+{
+	"name": "linkedin",
+	"description": "The absolute easies way to enable node.js for LinkedIn rest api. Includes runnable demo by Harald Rudell.",
+	"version": "0.0.1",
+	"contributors": [
+		{
+			"name": "Harald Rudell",
+			"email": "harald@allgoodapps.com",
+			"web": "http://blog.haraldrudell.com"
+		}
+	],
+	"repository": {
+		"type" : "git",
+		"url" : "https://haraldrudell@github.com/haraldrudell/linkedin.git"
+	},
+	"dependencies": {
+		"oauth": ">= 0.7.0"
+	},
+	"main" : "./lib/linkedin"
+}
