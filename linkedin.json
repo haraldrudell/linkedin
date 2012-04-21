@@ -1,7 +1,6 @@
 {
 	"consumerKey": "<API Key from https://www.linkedin.com/secure/developer>",
 	"consumerSecret": "<Secret Key from https://www.linkedin.com/secure/developer>",
-	"port": 3009,
 	"hostUrl": "http://localhost:3009",
 	"authenticateUri": "/authenticate",
 	"completedUri": "/",

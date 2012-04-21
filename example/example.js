@@ -49,25 +49,27 @@ client.authorize(function(err, url) {
 	}
 })
 
-// invoked by server when our url is requested, server extects json
+// invoked by server when completeUri is requested, server expects json
 // for requests to the redirect after authorizing, process and obtain Oauth access token
 function completedHandler(queryObject, callback) {
 	// for requests to the redirect after authorizing, process and obtain Oauth access token
 	client.handleAuthorizing(queryObject, function(err, possibleAccessCredentials) {
 		// some error trying to get access tokens
 		if (err) callback(err, null)
+		else {
 
-		if (possibleAccessCredentials) {
-			// we just successfully obtained Oauth access tokens, save them
-			// typically they last forever
-			utils.writeStore(possibleAccessCredentials)
+			if (possibleAccessCredentials) {
+				// we just successfully obtained Oauth access tokens, save them
+				// typically they last forever
+				utils.writeStore(possibleAccessCredentials)
+			}
+
+			// render some final data to the user
+			if (!client.hasAccess()) {
+				var json = ({ issue: 'You have not authorized this application' })
+				callback(null, json)
+			} else doApi(callback)
 		}
-
-		// render some final data to the user
-		if (!client.hasAccess()) {
-			var json = ({ issue: 'You have not authorized this application' })
-			callback(null, json)
-		} else doApi(callback)
 	})
 }
 
@@ -80,7 +82,10 @@ function doApi(callback) {
 	})
 }
 
+// user clicked reauthenticate, browser loaded autenticateUri, and here's our handler
 function authenticateHandler(callback) {
+	// clear possible authentication
 	client.clearAccess()
+	// re-initialize authentication, let server handle redirect to completedUri
 	client.authorize(callback)
 }
