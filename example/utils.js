@@ -11,6 +11,10 @@ var optsutils = require('../lib/optsutils')
 var spawn = require('child_process').spawn
 var credentialstore = require('./credentialstore')
 
+// for re-export
+var httpserver = require('./httpserver')
+var presentation = require('./presentation')
+
 // exports
 exports.browseTo = browseTo
 exports.getPort = getPort
@@ -18,6 +22,8 @@ exports.readStore = credentialstore.readStore
 exports.writeStore = credentialstore.writeStore
 exports.getDefaults = getDefaults
 exports.getHomeFolder = getHomeFolder
+exports.createServer = httpserver.createServer
+exports.handleHttp = presentation.handleHttp
 
 var fields = [ "consumerKey", "consumerSecret",
 	"hostUrl", "authenticateUri", "completedUri"
@@ -101,6 +107,8 @@ function getPort(hostUrl) {
 function getDefaults(filename, folders) {
 	var result = false
 
+	if (!folders) folders = [ getHomeFolder(), __dirname + '/..' ]
+
 	// look in all provided folders
 	if (Array.isArray(folders)) {
 		folders.every(function(folder) {
@@ -113,6 +121,8 @@ function getDefaults(filename, folders) {
 	} else {
 		result = load(filename, folder)
 	}
+
+	if (!result) throw Error('Problem finding the file ' + filename)
 
 	return result
 

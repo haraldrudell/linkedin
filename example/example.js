@@ -2,57 +2,53 @@
 // working LinkedIn rest api example
 
 // imports
+// the client code for this module that we should demonstrate
+// https://github.com/haraldrudell/linkedin
 var linkedin = require('../lib/linkedin')
 var utils = require('./utils')
-var server = require('./server')
 
 // the api call to display
 LinkedInUri = '/people/~:(picture-url,first-name,last-name,headline)'
 
 // get our configuration
-linkedinJson = 'linkedin.json'
-var defaults = utils.getDefaults(linkedinJson, [ utils.getHomeFolder(), __dirname + '/..' ])
-if (!defaults) throw(Error('Problem finding the file ' + linkedinJson))
+var defaults = utils.getDefaults('linkedin.json')
 var port = utils.getPort(defaults.hostUrl)
 
 // launch our server so we can display things to the user
 // and receive redirects from LinkedIn after authoriztion
-console.log('starting server:', defaults.hostUrl)
-var aServer = server.server(port,
-	defaults.completedUri, completedHandler,
-	defaults.authenticateUri, authenticateHandler,
-	console.log, defaults.register)
+var app = utils.createServer()
+utils.handleHttp(app, defaults, completedHandler,
+	authenticateHandler, console.log)
+app.listen(port)
 
-// authorize the web application for the user
+// prepare the local client code
 var client = linkedin.getApiClient(defaults)
 
-// here you could apply previously obtained credential for this user
+// apply access credentials that we stored for this user
+// the credentials would have been obtained at a prior authorization
 var obj = utils.readStore()
 if (obj) client.applyAccessCredentials(obj)
 
-// if we have credentials, use the api
-if (client.hasAccess()) {
-	// display our server to the user
-	utils.browseTo(defaults.authorize_callback)
-}
+// if we have credentials, immediately launch the browser to display the api call results
+if (client.hasAccess()) utils.browseTo(defaults.authorize_callback)
 
-// otherwise, authorize the LinkedIn web app first
-client.authorize(function(err, url) {
+// begin authorization flow with LinkedInotherwise, authorize the LinkedIn web app first
+else client.authorize(function(err, url) {
 	if (err) console.log('Error when retrieving request token from LinkedIn:', err)
-	else {
+	else 
+
 		// we successfully obtained Oauth request tokens
-
 		// display the authorization web page to the user
+		// user will finally be redirected to completedUri by LinkedIn
 		utils.browseTo(url)
-
-		// user will be redirected to completedUri by LinkedIn
-	}
 })
 
-// invoked by server when completeUri is requested, server expects json
-// for requests to the redirect after authorizing, process and obtain Oauth access token
+// An authroization attempt has been completed
+// capture access credentials
+// display api-call results to user
 function completedHandler(queryObject, callback) {
-	// for requests to the redirect after authorizing, process and obtain Oauth access token
+
+	// provide authroization results to local client code
 	client.handleAuthorizing(queryObject, function(err, possibleAccessCredentials) {
 		// some error trying to get access tokens
 		if (err) callback(err, null)
@@ -64,16 +60,18 @@ function completedHandler(queryObject, callback) {
 				utils.writeStore(possibleAccessCredentials)
 			}
 
-			// render some final data to the user
+			// verify that our app is authorized
 			if (!client.hasAccess()) {
 				var json = ({ issue: 'You have not authorized this application' })
 				callback(null, json)
-			} else doApi(callback)
+			} else
+				// execute the api call
+				doApi(callback)
 		}
 	})
 }
 
-// we are authorized and want to display something in json format
+// we are authorized and want to display something fun!
 function doApi(callback) {
 	// send an api call to LinkedIn
 	client.api(LinkedInUri, function(err, json) {
@@ -82,10 +80,15 @@ function doApi(callback) {
 	})
 }
 
-// user clicked reauthenticate, browser loaded autenticateUri, and here's our handler
+// the user clicked reauthenticate button on the completed page
+// the browser is fetching our authentication url
 function authenticateHandler(callback) {
-	// clear possible authentication
+
+	// clear possible exisiting credentials
 	client.clearAccess()
-	// re-initialize authentication, let server handle redirect to completedUri
+
+	// have our client code re-initialize authentication
+	// this will redirect to LinkedIn's authorization page
+	// and eventually we will get a request for completedUri
 	client.authorize(callback)
 }

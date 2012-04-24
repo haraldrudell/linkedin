@@ -1,7 +1,8 @@
 {
 	"name": "linkedin",
 	"description": "The absolute easies way to enable node.js for LinkedIn rest api. Includes runnable demo by Harald Rudell.",
-	"version": "0.0.1",
+	"author": "Harald Rudell <harald@allgoodapps.com>",
+	"version": "0.0.2",
 	"contributors": [
 		{
 			"name": "Harald Rudell",
